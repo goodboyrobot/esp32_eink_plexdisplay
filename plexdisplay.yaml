@@ -1,0 +1,142 @@
+esphome:
+  name: plexdisplay
+  friendly_name: plexdisplay
+  on_boot:
+    priority: 200.0
+    then:
+      - script.execute: get_data_then_refresh_screen
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret plexdisplay_api_key
+
+ota:
+  password: !secret plexdisplay_ota_pass
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Plexdisplay Fallback Hotspot"
+    password: !secret plexdisplay_fallback
+
+captive_portal:
+
+sensor:
+#  - platform: adc
+#    id: voltage_raw
+#    pin: GPIO35
+#    update_interval: 60s
+
+#  - platform: template
+#    name: voltage
+#    id: voltage
+#    unit_of_measurement: "volts"
+#    lambda: |-
+#      return id(voltage_raw).state / 4096.0 * 7.46;
+#    accuracy_decimals: 2
+  - platform: homeassistant
+    entity_id: sensor.tautulli_watching
+    id: plex_users_watching
+  - platform: homeassistant
+    entity_id: sensor.tautulli_total_bandwidth
+    id: plex_total_bandwidth
+  - platform: homeassistant
+    entity_id: sensor.tautulli_transcodes
+    id: plex_transcodes
+  - platform: homeassistant
+    entity_id: sensor.leda_composite_temperature
+    id: leda_composite_temperature
+  - platform: homeassistant
+    entity_id: sensor.leda_cpu_usage
+    id: leda_cpu_usage
+  - platform: homeassistant
+    entity_id: sensor.leda_memory_usage
+    id: leda_memory_usage
+  - platform: homeassistant
+    entity_id: sensor.leda_uptime
+    id: leda_uptime
+
+time:
+  - platform: homeassistant
+    timezone: "America/Los_Angeles"
+    id: homeassistant_time
+    on_time:
+      - seconds: 0
+        minutes: 0,15,30,45
+        then:
+          - script.execute: get_data_then_refresh_screen
+
+script:
+  - id: get_data_then_refresh_screen
+    mode: restart
+    then:
+      - delay: 30s # Wait a bit longer so all the items are received. Might need to be more.
+      - logger.log: "Sensor data received."
+      - component.update: eink_display
+
+
+# Pins for Waveshare ePaper ESP Board
+spi:
+  clk_pin: GPIO13
+  mosi_pin: GPIO14
+
+font:
+    # gfonts://family[@weight]
+  - file: "gfonts://Roboto"
+    id: roboto_20
+    size: 20
+  - file: "gfonts://Roboto"
+    id: roboto_40
+    size: 40
+
+display:
+  - platform: waveshare_epaper
+    id: eink_display
+    cs_pin: GPIO15
+    dc_pin: GPIO27
+    busy_pin:
+      number: GPIO25
+      inverted: true #needed on most newer boards: check ESPHome or component notes
+    reset_pin: GPIO26
+    #reset_duration: 2ms
+    model: 7.50in-bV3
+    update_interval: never
+    lambda: |- 
+      
+      //plex section
+      it.fill(COLOR_OFF);
+      it.printf(20, 20, id(roboto_40), COLOR_ON, "Plex Statistics");
+      it.printf(20, 60, id(roboto_20), COLOR_ON, "Currently watching: %d", int(id(plex_users_watching).state));
+      it.printf(20, 80, id(roboto_20), COLOR_ON, "Total Transcodes : %d", int(id(plex_transcodes).state));
+      it.printf(20, 100, id(roboto_20), COLOR_ON, "Total Bandwidth: %.2f mbps", id(plex_total_bandwidth).state / 1024.0);
+
+      //system section
+      it.printf(20, 140, id(roboto_40), COLOR_ON, "Leda Health");
+      it.printf(20, 180, id(roboto_20), COLOR_ON, "Leda Temp: %.1f C", id(leda_composite_temperature).state);
+      it.printf(20, 200, id(roboto_20), COLOR_ON, "Leda CPU: %.1f %%", id(leda_cpu_usage).state);
+      it.printf(20, 220, id(roboto_20), COLOR_ON, "Leda Memory: %.1f %%", id(leda_memory_usage).state);
+      //it.printf(20, 240, id(roboto_20), COLOR_ON, "Leda Uptime: %d", int(id(leda_uptime).state));
+
+      //Timestamp:
+      char str[17];
+      time_t currTime = id(homeassistant_time).now().timestamp;
+      strftime(str, sizeof(str), "%l:%M%p %a", localtime(&currTime));
+      it.printf(400, 460, id(roboto_20), COLOR_ON, TextAlign::TOP_CENTER, "Refreshed at %s", str);
+
+
+
+    
+
+    
