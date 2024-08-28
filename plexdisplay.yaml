@@ -68,6 +68,27 @@ sensor:
     entity_id: sensor.leda_uptime
     id: leda_uptime
 
+text_sensor:
+  - platform: homeassistant
+    entity_id: weather.home_weather
+    id: home_weather
+
+  - platform: homeassistant
+    entity_id: weather.home_weather
+    attribute: temperature
+    id: home_weather_temperature
+
+  - platform: homeassistant
+    entity_id: weather.home_weather
+    attribute: humidity
+    id: home_weather_humidity
+
+  - platform: homeassistant
+    entity_id: weather.home_weather
+    attribute: wind_speed
+    id: home_weather_wind_speed
+
+
 time:
   - platform: homeassistant
     timezone: "America/Los_Angeles"
@@ -100,6 +121,41 @@ font:
   - file: "gfonts://Roboto"
     id: roboto_40
     size: 40
+  - file: "gfonts://Material+Symbols+Outlined"
+    id: font_weather_glyphs
+    size: 50
+    glyphs: &mdi-weather-glyphs
+      - "\U0000e2bd" # mdi-weather-cloudy
+      #- "\U000F0F2F" # mdi-weather-cloudy-alert //use sunny-alert
+      #- "\U000F0E6E" # mdi-weather-cloudy-arrow-right // use cloudy
+      - "\U0000e818" # mdi-weather-fog
+      - "\U0000f67f" # mdi-weather-hail
+      #- "\U000F0F30" # mdi-weather-hazy //use fog
+      - "\U0000f070" # mdi-weather-hurricane
+      - "\U0000ebdb" # mdi-weather-lightning
+      #- "\U000F067E" # mdi-weather-lightning-rainy
+      - "\U0000ef44" # mdi-weather-night
+      - "\U0000f174" # mdi-weather-night-partly-cloudy
+      - "\U0000f172" # mdi-weather-partly-cloudy
+      #- "\U000F0F32" # mdi-weather-partly-lightning
+      #- "\U000F0F33" # mdi-weather-partly-rainy
+      #- "\U000F0F34" # mdi-weather-partly-snowy
+      #- "\U000F0F35" # mdi-weather-partly-snowy-rainy
+      - "\U0000f61f" # mdi-weather-pouring
+      - "\U0000f176" # mdi-weather-rainy
+      - "\U0000e2cd" # mdi-weather-snowy
+      #- "\U000F0F36" # mdi-weather-snowy-heavy
+      - "\U0000f60b" # mdi-weather-snowy-rainy
+      - "\U0000e81a" # mdi-weather-sunny
+      - "\U0000e002" # mdi-weather-sunny-alert
+      #- "\U000F14E4" # mdi-weather-sunny-off
+      - "\U0000e1c6" # mdi-weather-sunset
+      #- "\U000F059B" # mdi-weather-sunset-down
+      #- "\U000F059C" # mdi-weather-sunset-up
+      - "\U0000e199" # mdi-weather-tornado
+      - "\U0000efd8" # mdi-weather-windy
+      #- "\U000F059E" # mdi-weather-windy-variant
+      - "\U0000e575" # unknown
 
 display:
   - platform: waveshare_epaper
@@ -115,6 +171,41 @@ display:
     update_interval: never
     lambda: |- 
       
+      std::map<std::string, std::string> weather_icon_map
+        {
+          {"cloudy", "\U0000e2bd"},
+          {"cloudy-alert", "\U0000e002"},
+          {"cloudy-arrow-right", "\U0000e2bd"},
+          {"fog", "\U0000e818"},
+          {"hail", "\U0000f67f"},
+          {"hazy", "\U0000e818"},
+          {"hurricane", "\U0000f070"},
+          {"lightning", "\U0000ebdb"},
+          {"lightning-rainy", "\U0000ebdb"},
+          {"night", "\U000F0594"},
+          {"night-partly-cloudy", "\U0000ef44"},
+          {"partlycloudy", "\U0000f174"},
+          {"partly-lightning", "\U0000ebdb"},
+          {"partly-rainy", "\U0000f176"},
+          {"partly-snowy", "\U0000e2cd"},
+          {"partly-snowy-rainy", "\U0000f60b"},
+          {"pouring", "\U0000f61f"},
+          {"rainy", "\U0000f176"},
+          {"snowy", "\U0000e2cd"},
+          {"snowy-heavy", "\U0000e2cd"},
+          {"snowy-rainy", "\U0000f60b"},
+          {"sunny", "\U0000e81a"},
+          {"sunny-alert", "\U0000e002"},
+          {"sunny-off", "\U0000e81a"},
+          {"sunset", "\U0000e1c6"},
+          {"sunset-down", "\U0000e1c6"},
+          {"sunset-up", "\U0000e1c6"},
+          {"tornado", "\U0000e199"},
+          {"windy", "\U0000efd8"},
+          {"windy-variant", "\U0000efd8"},
+          {"unknown", "\U0000e575"}
+        };
+
       //plex section
       it.fill(COLOR_OFF);
       it.printf(20, 20, id(roboto_40), COLOR_ON, "Plex Statistics");
@@ -135,8 +226,23 @@ display:
       strftime(str, sizeof(str), "%l:%M%p %a", localtime(&currTime));
       it.printf(400, 460, id(roboto_20), COLOR_ON, TextAlign::TOP_CENTER, "Refreshed at %s", str);
 
+      //Weather
+      std::string weather_icon = "\U0000e575";
+      if (weather_icon_map.find(id(home_weather).state.c_str()) != weather_icon_map.end())
+      {
+        weather_icon = weather_icon_map[id(home_weather).state.c_str()];
+      }
+      it.printf(350, 20, id(font_weather_glyphs), COLOR_ON, "%s", weather_icon.c_str());
+      it.printf(420, 20, id(roboto_20), COLOR_ON, "Current weather is %s", id(home_weather).state.c_str());
+      it.printf(420, 40, id(roboto_20), COLOR_ON, "Temperature: %s °F", id(home_weather_temperature).state.c_str());
+      it.printf(420, 60, id(roboto_20), COLOR_ON, "Humidity: %s %%", id(home_weather_humidity).state.c_str());
+      it.printf(420, 80, id(roboto_20), COLOR_ON, "Wind_speed: %s mph", id(home_weather_wind_speed).state.c_str());
 
-
-    
-
-    
+      //TODO:
+      // 3 Day Forcast
+      // 3D Printer Status
+      // Energy Consumption, Generation
+      // Car Battery Level?
+      // Litter robots (lol)
+      // History graphs where it makes sense
+      // Improve layout
