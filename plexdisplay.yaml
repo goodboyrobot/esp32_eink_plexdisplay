@@ -69,6 +69,8 @@ sensor:
     entity_id: sensor.leda_uptime
     id: leda_uptime
 
+  
+
 text_sensor:
   - platform: homeassistant
     entity_id: weather.home_weather
@@ -88,6 +90,35 @@ text_sensor:
     entity_id: weather.home_weather
     attribute: wind_speed
     id: home_weather_wind_speed
+
+  - platform: homeassistant
+    entity_id: sensor.hephaestus_print_status
+    id: printer_status
+  - platform: homeassistant
+    entity_id: sensor.hephaestus_print_progress
+    id: printer_progress
+  - platform: homeassistant
+    entity_id: sensor.hephaestus_remaining_time
+    id: printer_remaining_time
+  - platform: homeassistant
+    entity_id: sensor.hephaestus_end_time
+    id: printer_end_time
+
+  - platform: homeassistant
+    entity_id: sensor.fecidious_waste_drawer
+    id: fecidious_waste
+  - platform: homeassistant
+    entity_id: sensor.fecidious_status_code
+    id: fecidious_status
+  - platform: homeassistant
+    entity_id: sensor.poosidon_waste_drawer
+    id: poosidon_waste
+  - platform: homeassistant
+    entity_id: sensor.poosidon_status_code
+    id: poosidon_status
+  - platform: homeassistant
+    entity_id: sensor.fecidious_pet_weight
+    id: shepard_weight
 
 
 time:
@@ -207,6 +238,35 @@ display:
           {"unknown", "\U0000e575"}
         };
 
+      std::map<std::string, std::string> litter_robot_status_map
+      {
+        {"br", "Bonnet Removed"},
+        {"ccc", "Clean Cycle Complete"},
+        {"ccp", "Clean Cycle In Progress"},
+        {"cd", "Cat Detected"},
+        {"csf", "Cat Sensor Fault"},
+        {"csi", "Cat Sensor Interrupted"},
+        {"cst", "Cat Sensor Timing"},
+        {"df1", "Drawer Almost Full - 2 Cycles Left"},
+        {"df2", "Drawer Almost Full - 1 Cycle Left"},
+        {"dfs", "Drawer Full"},
+        {"dhf", "Dump + Home Position Fault"},
+        {"dpf", "Dump Position Fault"},
+        {"ec", "Empty Cycle"},
+        {"hpf", "Home Position Fault"},
+        {"off", "Off"},
+        {"offline", "Offline"},
+        {"otf", "Over Torque Fault"},
+        {"p", "Paused"},
+        {"pd", "Pinch Detect"},
+        {"pwrd", "Powering Down"},
+        {"pwru", "Powering Up"},
+        {"rdy", "Ready"},
+        {"scf", "Cat Sensor Fault At Startup"},
+        {"sdf", "Drawer Full At Startup"},
+        {"spf", "Pinch Detect At Startup"}
+      };
+
       //plex section
       it.fill(COLOR_OFF);
       it.printf(20, 20, id(roboto_40), COLOR_ON, "Plex Statistics");
@@ -237,13 +297,23 @@ display:
       it.printf(420, 20, id(roboto_20), COLOR_ON, "Current weather is %s", id(home_weather).state.c_str());
       it.printf(420, 40, id(roboto_20), COLOR_ON, "Temperature: %s °F", id(home_weather_temperature).state.c_str());
       it.printf(420, 60, id(roboto_20), COLOR_ON, "Humidity: %s %%", id(home_weather_humidity).state.c_str());
-      it.printf(420, 80, id(roboto_20), COLOR_ON, "Wind_speed: %s mph", id(home_weather_wind_speed).state.c_str());
+      it.printf(420, 80, id(roboto_20), COLOR_ON, "Wind speed: %s mph", id(home_weather_wind_speed).state.c_str());
+
+      //3D printer
+      it.printf(20, 260, id(roboto_20), COLOR_ON, "Printer Status: %s", id(printer_status).state.c_str());
+      it.printf(20, 280, id(roboto_20), COLOR_ON, "Progres: %s %%", id(printer_progress).state.c_str());
+      it.printf(20, 300, id(roboto_20), COLOR_ON, "Remaining: %s minutes", id(printer_remaining_time).state.c_str());
+      it.printf(20, 320, id(roboto_20), COLOR_ON, "End Time: %s", id(printer_end_time).state.c_str());
+
+      //Cat boxes
+      it.printf(20, 360, id(roboto_20), COLOR_ON, "Fecidious is %s and %s %% full", litter_robot_status_map[id(fecidious_status).state.c_str()].c_str(), id(fecidious_waste).state.c_str());
+      it.printf(20, 380, id(roboto_20), COLOR_ON, "Poosidon is %s and %s %% full", litter_robot_status_map[id(poosidon_status).state.c_str()].c_str(), id(poosidon_waste).state.c_str());
+      it.printf(20, 400, id(roboto_20), COLOR_ON, "Shepard Chonk Status: %s lbs", id(shepard_weight).state.c_str());
+
 
       //TODO:
       // 3 Day Forcast
-      // 3D Printer Status
       // Energy Consumption, Generation
       // Car Battery Level?
-      // Litter robots (lol)
       // History graphs where it makes sense
       // Improve layout
