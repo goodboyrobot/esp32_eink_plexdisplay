@@ -1,5 +1,5 @@
 esphome:
-  name: plexdisplay
+  name: "plexdisplay"
   friendly_name: plexdisplay
   on_boot:
     priority: 200.0
@@ -73,35 +73,35 @@ sensor:
 
 text_sensor:
   - platform: homeassistant
-    entity_id: weather.home_weather
+    entity_id: weather.forecast_home
     id: home_weather
 
   - platform: homeassistant
-    entity_id: weather.home_weather
+    entity_id: weather.forecast_home
     attribute: temperature
     id: home_weather_temperature
 
   - platform: homeassistant
-    entity_id: weather.home_weather
+    entity_id: weather.forecast_home
     attribute: humidity
     id: home_weather_humidity
 
   - platform: homeassistant
-    entity_id: weather.home_weather
+    entity_id: weather.forecast_home
     attribute: wind_speed
     id: home_weather_wind_speed
 
   - platform: homeassistant
-    entity_id: sensor.hephaestus_print_status
+    entity_id: sensor.x1c_print_status
     id: printer_status
   - platform: homeassistant
-    entity_id: sensor.hephaestus_print_progress
+    entity_id: sensor.x1c_print_progress
     id: printer_progress
   - platform: homeassistant
-    entity_id: sensor.hephaestus_remaining_time
+    entity_id: sensor.x1c_remaining_time
     id: printer_remaining_time
   - platform: homeassistant
-    entity_id: sensor.hephaestus_end_time
+    entity_id: sensor.x1c_end_time
     id: printer_end_time
 
   - platform: homeassistant
