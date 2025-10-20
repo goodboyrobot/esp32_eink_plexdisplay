@@ -120,6 +120,10 @@ text_sensor:
     entity_id: sensor.fecidious_pet_weight
     id: shepard_weight
 
+  - platform: homeassistant
+    entity_id: sensor.2023_ioniq_5_ev_battery_level
+    id: car_charge
+
 
 time:
   - platform: homeassistant
@@ -310,6 +314,8 @@ display:
       it.printf(20, 380, id(roboto_20), COLOR_ON, "Poosidon is %s and %s %% full", litter_robot_status_map[id(poosidon_status).state.c_str()].c_str(), id(poosidon_waste).state.c_str());
       it.printf(20, 400, id(roboto_20), COLOR_ON, "Shepard Chonk Status: %s lbs", id(shepard_weight).state.c_str());
 
+      // Car charge
+      it.printf(350, 360, id(roboto_20), COLOR_ON, "Car Charge: %s%%", id(car_charge).state.c_str());
 
       //TODO:
       // 3 Day Forcast
