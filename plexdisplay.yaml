@@ -92,6 +92,43 @@ text_sensor:
     id: home_weather_wind_speed
 
   - platform: homeassistant
+    entity_id: sensor.forecast_3_day
+    attribute: forecast_condition_1
+    id: home_forecast_condition_1
+  - platform: homeassistant
+    entity_id: sensor.forecast_3_day
+    attribute: forecast_temperature_1
+    id: home_forecast_temperature_1
+  - platform: homeassistant
+    entity_id: sensor.forecast_3_day
+    attribute: forecast_templow_1
+    id: home_forecast_templow_1
+  - platform: homeassistant
+    entity_id: sensor.forecast_3_day
+    attribute: forecast_condition_2
+    id: home_forecast_condition_2
+  - platform: homeassistant
+    entity_id: sensor.forecast_3_day
+    attribute: forecast_temperature_2
+    id: home_forecast_temperature_2
+  - platform: homeassistant
+    entity_id: sensor.forecast_3_day
+    attribute: forecast_templow_2
+    id: home_forecast_templow_2
+  - platform: homeassistant
+    entity_id: sensor.forecast_3_day
+    attribute: forecast_condition_3
+    id: home_forecast_condition_3
+  - platform: homeassistant
+    entity_id: sensor.forecast_3_day
+    attribute: forecast_temperature_3
+    id: home_forecast_temperature_3
+  - platform: homeassistant
+    entity_id: sensor.forecast_3_day
+    attribute: forecast_templow_3
+    id: home_forecast_templow_3
+
+  - platform: homeassistant
     entity_id: sensor.x1c_print_status
     id: printer_status
   - platform: homeassistant
@@ -210,6 +247,7 @@ display:
       std::map<std::string, std::string> weather_icon_map
         {
           {"cloudy", "\U0000e2bd"},
+          {"clear-night", "\U000F0594" },
           {"cloudy-alert", "\U0000e002"},
           {"cloudy-arrow-right", "\U0000e2bd"},
           {"fog", "\U0000e818"},
@@ -219,8 +257,8 @@ display:
           {"lightning", "\U0000ebdb"},
           {"lightning-rainy", "\U0000ebdb"},
           {"night", "\U000F0594"},
-          {"night-partly-cloudy", "\U0000ef44"},
-          {"partlycloudy", "\U0000f174"},
+          {"night-partly-cloudy", "\U0000f174"},
+          {"partlycloudy", "\U0000f172"},
           {"partly-lightning", "\U0000ebdb"},
           {"partly-rainy", "\U0000f176"},
           {"partly-snowy", "\U0000e2cd"},
@@ -303,6 +341,44 @@ display:
       it.printf(420, 60, id(roboto_20), COLOR_ON, "Humidity: %s %%", id(home_weather_humidity).state.c_str());
       it.printf(420, 80, id(roboto_20), COLOR_ON, "Wind speed: %s mph", id(home_weather_wind_speed).state.c_str());
 
+      char dayofweek[5];
+      //Forecast Day 1
+      currTime +=  24 * 60 * 60; // Add one day for the day of week calc
+      strftime(dayofweek, sizeof(dayofweek), "%a", localtime(&currTime));
+      it.printf(360, 120, id(roboto_20), COLOR_ON, "%s", dayofweek);
+      weather_icon = "\U0000e575";
+      if (weather_icon_map.find(id(home_weather).state.c_str()) != weather_icon_map.end())
+      {
+        weather_icon = weather_icon_map[id(home_forecast_condition_1).state.c_str()];
+      }
+      it.printf(355, 140, id(font_weather_glyphs), COLOR_ON, "%s", weather_icon.c_str());
+      it.printf(350, 190, id(roboto_20), COLOR_ON, "%s/%s", id(home_forecast_temperature_1).state.c_str(), id(home_forecast_templow_1).state.c_str());
+
+      //Forecast Day 2
+      currTime +=  24 * 60 * 60; // Add one day for the day of week calc
+      strftime(dayofweek, sizeof(dayofweek), "%a", localtime(&currTime));
+      it.printf(480, 120, id(roboto_20), COLOR_ON, "%s", dayofweek);
+      weather_icon = "\U0000e575";
+      if (weather_icon_map.find(id(home_weather).state.c_str()) != weather_icon_map.end())
+      {
+        weather_icon = weather_icon_map[id(home_forecast_condition_2).state.c_str()];
+      }
+      it.printf(475, 140, id(font_weather_glyphs), COLOR_ON, "%s", weather_icon.c_str());
+      it.printf(470, 190, id(roboto_20), COLOR_ON, "%s/%s", id(home_forecast_temperature_2).state.c_str(), id(home_forecast_templow_2).state.c_str());
+
+      //Forecast Day 3
+      currTime +=  24 * 60 * 60; // Add one day for the day of week calc
+      strftime(dayofweek, sizeof(dayofweek), "%a", localtime(&currTime));
+      it.printf(600, 120, id(roboto_20), COLOR_ON, "%s", dayofweek);
+      weather_icon = "\U0000e575";
+      if (weather_icon_map.find(id(home_weather).state.c_str()) != weather_icon_map.end())
+      {
+        weather_icon = weather_icon_map[id(home_forecast_condition_3).state.c_str()];
+      }
+      it.printf(595, 140, id(font_weather_glyphs), COLOR_ON, "%s", weather_icon.c_str());
+      it.printf(590, 190, id(roboto_20), COLOR_ON, "%s/%s", id(home_forecast_temperature_3).state.c_str(), id(home_forecast_templow_3).state.c_str());
+
+
       //3D printer
       it.printf(20, 260, id(roboto_20), COLOR_ON, "Printer Status: %s", id(printer_status).state.c_str());
       it.printf(20, 280, id(roboto_20), COLOR_ON, "Progres: %s %%", id(printer_progress).state.c_str());
@@ -318,8 +394,6 @@ display:
       it.printf(350, 360, id(roboto_20), COLOR_ON, "Car Charge: %s%%", id(car_charge).state.c_str());
 
       //TODO:
-      // 3 Day Forcast
       // Energy Consumption, Generation
-      // Car Battery Level?
       // History graphs where it makes sense
       // Improve layout
